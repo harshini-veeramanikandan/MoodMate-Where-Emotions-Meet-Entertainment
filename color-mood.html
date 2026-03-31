@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Color → Mood — MoodMate</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="dark">
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <img src="image.png" alt="MoodMate Logo" class="logo">
+      <h1>MoodMate</h1>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="playlists.html">Playlists</a>
+      <a href="movies.html">Movies</a>
+      <a href="music.html">Music</a>
+      <a href="games.html" class="active">Games</a>
+      <a href="voice-mood.html">🎙️ Voice</a>
+      <a href="streak.html">🔥 Streak</a>
+      <a href="profile.html">Profile</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="header">
+    <!-- LEFT: game content -->
+    <div class="hero">
+      <h2>🎨 Color → Mood Translator</h2>
+      <p>Pick a color and we'll match it to a mood — then show you movies and music.</p>
+      <div class="toolbar">
+        <input type="color" id="colorPicker" value="#7c4dff" style="width:64px;height:44px;border:none;border-radius:10px;cursor:pointer;background:none;">
+        <button id="translateBtn" class="btn primary">Translate color</button>
+      </div>
+      <div class="section">
+        <h3>Result</h3>
+        <div id="resultMood" class="meta" style="font-size:18px;font-weight:600;margin-bottom:20px;"></div>
+        <div id="results" class="grid"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: how it works -->
+    <div class="summary">
+      <h3>How it works</h3>
+      <p style="color:var(--text-2);font-size:13px;margin-bottom:14px;">Colors map to moods by their dominant RGB channel.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="detail-info-card"><div class="detail-info-value">🔵 Blue tones → <strong>Sad</strong></div></div>
+        <div class="detail-info-card"><div class="detail-info-value">🔴 Red tones → <strong>Scared</strong></div></div>
+        <div class="detail-info-card"><div class="detail-info-value">🟢 Green tones → <strong>Relaxed</strong></div></div>
+        <div class="detail-info-card"><div class="detail-info-value">🟡 Yellow tones → <strong>Happy</strong></div></div>
+        <div class="detail-info-card"><div class="detail-info-value">💜 Purple/Pink → <strong>Romantic</strong></div></div>
+        <div class="detail-info-card"><div class="detail-info-value">⚡ Other vivid → <strong>Energetic</strong></div></div>
+      </div>
+      <div style="margin-top:14px;">
+        <a class="btn" href="games.html">← Back to Games</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">© MoodMate — color mood</footer>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+<script src="color-mood.js"></script>
+
+<a class="mic-float" href="voice-mood.html" title="Voice Mood Detector">🎙️</a>
+</body>
+</html>

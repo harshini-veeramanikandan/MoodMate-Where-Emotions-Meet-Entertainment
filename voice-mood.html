@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Voice Mood — MoodMate</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="dark">
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <img src="image.png" alt="MoodMate Logo" class="logo">
+      <h1>MoodMate</h1>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="playlists.html">Playlists</a>
+      <a href="movies.html">Movies</a>
+      <a href="music.html">Music</a>
+      <a href="games.html">Games</a>
+      <a href="voice-mood.html" class="active">🎙️ Voice</a>
+      <a href="streak.html">🔥 Streak</a>
+      <a href="profile.html">Profile</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="header">
+    <!-- LEFT: voice detector -->
+    <div class="hero">
+      <h2>🎙️ Voice Mood Detector</h2>
+      <p>Speak a sentence — we'll detect your mood and recommend movies &amp; music instantly.</p>
+
+      <!-- Not supported banner -->
+      <div id="noSupport" style="display:none; background:#1e1a1a; border:1px solid #5c2626; border-radius:12px; padding:18px 22px; color:#f87171; font-size:14px; text-align:center; margin-bottom:16px;">
+        🚫 Your browser doesn't support speech recognition. Try <strong>Chrome</strong> or <strong>Edge</strong>.
+      </div>
+
+      <!-- Mic orb -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:22px; padding:32px 0 16px;">
+        <div class="voice-orb-wrap" id="orbWrap">
+          <div class="pulse-ring"></div>
+          <div class="pulse-ring"></div>
+          <div class="pulse-ring"></div>
+          <button class="vm-mic-btn" id="micBtn" title="Click to speak">🎙️</button>
+        </div>
+
+        <div class="vm-status" id="vmStatus">Press the mic and speak</div>
+        <div class="vm-transcript" id="vmTranscript"></div>
+        <div class="vm-badge" id="vmBadge"></div>
+
+        <div class="vm-chips">
+          <span class="vm-chip">😊 joy / happy</span>
+          <span class="vm-chip">😢 sad / tired</span>
+          <span class="vm-chip">❤️ love / romance</span>
+          <span class="vm-chip">🌿 calm / chill</span>
+          <span class="vm-chip">😱 scared / anxious</span>
+          <span class="vm-chip">⚡ hyped / energy</span>
+        </div>
+
+        <div id="retryRow" style="display:none; gap:10px; flex-wrap:wrap; justify-content:center;">
+          <button class="btn" id="retryBtn">🔁 Try again</button>
+          <a class="btn primary" id="exploreLink" href="playlists.html">🎧 Explore this mood</a>
+        </div>
+      </div>
+
+      <div style="height:1px; background:var(--card-border); margin:8px 0 20px;"></div>
+
+      <!-- Results injected here -->
+      <div id="vmResults"></div>
+    </div>
+
+    <!-- RIGHT: how it works panel -->
+    <div class="summary">
+      <h3>How it works</h3>
+      <p style="color:var(--text-2);font-size:14px;margin-bottom:16px;">Tap the mic, say how you feel — like <em>"I feel really tired and just want to relax"</em> — and MoodMate decodes your mood from your words.</p>
+
+      <h3>Tips</h3>
+      <p style="color:var(--text-2);font-size:14px;margin-bottom:16px;">Speak clearly and use emotion words. The more descriptive, the better the match.</p>
+
+      <h3>Privacy</h3>
+      <p style="color:var(--text-2);font-size:14px;margin-bottom:16px;">No audio is stored or sent anywhere. Transcription happens entirely in your browser via the Web Speech API.</p>
+
+      <h3>Browser support</h3>
+      <p style="color:var(--text-2);font-size:14px;margin-bottom:16px;">Works in <strong>Chrome</strong> and <strong>Edge</strong>. Firefox doesn't support the Web Speech API.</p>
+
+      <h3>Other mood tools</h3>
+      <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+        <a class="btn" href="emotion-decoder.html">🧠 Type your mood</a>
+        <a class="btn" href="fortune.html">🔮 Fortune Teller</a>
+        <a class="btn" href="color-mood.html">🎨 Color → Mood</a>
+        <a class="btn" href="alterego.html">🔥 Alter-Ego</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">© MoodMate — voice mood</footer>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  renderNavUser();
+  applyMoodTheme("relaxed");
+  mountFavoriteHandler(document.body);
+
+  const moodKeywords = {
+    happy:    ["happy","joy","excited","grateful","great","amazing","wonderful","fantastic","cheerful","good","awesome","smile","laugh","fun","thrilled","elated","delighted","blessed","pumped","stoked"],
+    sad:      ["sad","low","down","tired","lonely","cry","depressed","unhappy","miserable","hopeless","gloomy","heartbroken","upset","blue","disappointed","dull","empty","lost","broken","hurt","miss"],
+    romantic: ["love","romance","heart","crush","valentine","beloved","darling","affection","passionate","tender","intimate","miss","yearning","adore","together","date","kiss","sweet","cute"],
+    relaxed:  ["calm","peace","relax","chill","rest","quiet","serene","slow","gentle","easy","mellow","cozy","soft","lazy","breathe","unwind","still","tranquil","zen","breezy"],
+    scared:   ["scared","anxious","afraid","fear","nervous","worry","panic","dread","terrified","horror","uneasy","stressed","tense","overwhelmed","paranoid","shaky","dark","creepy","nightmare"],
+    energetic:["hype","energy","pumped","wild","fired","motivated","productive","unstoppable","bounce","rush","sprint","powerful","electric","loud","dance","party","lit","go","move","alive","charge"]
+  };
+
+  const moodMeta = {
+    happy:    { emoji:"😊", label:"Happy",    color:"var(--happy)",    bg:"rgba(255,213,79,.15)"  },
+    sad:      { emoji:"😢", label:"Sad",       color:"var(--sad)",      bg:"rgba(144,202,249,.15)" },
+    romantic: { emoji:"❤️", label:"Romantic",  color:"var(--romantic)", bg:"rgba(244,143,177,.15)" },
+    relaxed:  { emoji:"🌿", label:"Relaxed",   color:"var(--relaxed)",  bg:"rgba(179,157,219,.15)" },
+    scared:   { emoji:"😱", label:"Scared",    color:"var(--scared)",   bg:"rgba(239,154,154,.15)" },
+    energetic:{ emoji:"⚡", label:"Energetic", color:"var(--energetic)", bg:"rgba(251,146,60,.12)" }
+  };
+
+  function detectMood(text) {
+    const t = text.toLowerCase();
+    let best = "happy", score = 0;
+    for (const [mood, words] of Object.entries(moodKeywords)) {
+      const s = words.reduce((acc, w) => acc + (t.includes(w) ? 1 : 0), 0);
+      if (s > score) { score = s; best = mood; }
+    }
+    return best;
+  }
+
+  function highlightKeywords(text) {
+    let out = text;
+    for (const [mood, words] of Object.entries(moodKeywords)) {
+      for (const w of words) {
+        const re = new RegExp(`\\b(${w})\\b`, "gi");
+        out = out.replace(re, `<span class="kw kw-${mood}">$1</span>`);
+      }
+    }
+    return out;
+  }
+
+  function pickN(arr, n) {
+    return [...arr].sort(() => Math.random() - .5).slice(0, n);
+  }
+
+  function showResults(mood, text) {
+    const meta = moodMeta[mood];
+    applyMoodTheme(mood);
+
+    const badge = document.getElementById("vmBadge");
+    badge.style.background = meta.bg;
+    badge.style.borderColor = meta.color;
+    badge.style.color = meta.color;
+    badge.innerHTML = `${meta.emoji} Detected mood: <strong>${meta.label}</strong>`;
+    badge.classList.add("show");
+
+    const box = document.getElementById("vmTranscript");
+    box.innerHTML = `<span style="color:var(--text-3);font-size:11px;letter-spacing:.6px;text-transform:uppercase;display:block;margin-bottom:6px;">You said:</span>${highlightKeywords(text)}`;
+    box.classList.add("visible");
+
+    const exploreLink = document.getElementById("exploreLink");
+    exploreLink.href = `playlists.html?mood=${encodeURIComponent(mood)}`;
+    document.getElementById("retryRow").style.display = "flex";
+
+    const movies = pickN(moodData[mood]?.movies || [], 3);
+    const music  = pickN(moodData[mood]?.music  || [], 3);
+
+    document.getElementById("vmResults").innerHTML = `
+      <h3 style="margin:0 0 4px;">Picks for your vibe</h3>
+      <p class="meta" style="margin-bottom:16px;">Curated for <strong style="color:${meta.color}">${meta.emoji} ${meta.label}</strong> mood</p>
+      <div class="vm-results-grid">
+        <div class="result-col">
+          <h4>🎬 Movies</h4>
+          <div class="grid" style="grid-template-columns:1fr;">
+            ${movies.length ? movies.map(m => movieCard(m, mood)).join("") : `<p class="meta">No movies found.</p>`}
+          </div>
+        </div>
+        <div class="result-col">
+          <h4>🎵 Music</h4>
+          <div class="grid" style="grid-template-columns:1fr;">
+            ${music.length ? music.map(t => musicCard(t, mood)).join("") : `<p class="meta">No music found.</p>`}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const micBtn   = document.getElementById("micBtn");
+  const orbWrap  = document.getElementById("orbWrap");
+  const statusEl = document.getElementById("vmStatus");
+
+  if (!SR) {
+    document.getElementById("noSupport").style.display = "block";
+    micBtn.disabled = true;
+    micBtn.style.opacity = ".4";
+    micBtn.style.cursor = "not-allowed";
+  } else {
+    // Key fix: create a FRESH recognition instance each time.
+    // Reusing the same instance after .stop() causes silent failures in Edge/Chrome.
+    let isRecording = false;
+    let permissionGranted = false;
+    let finalTranscript = "";
+    let recognition = null;
+
+    function resetUI() {
+      micBtn.classList.remove("recording");
+      orbWrap.classList.remove("orb-recording");
+      micBtn.innerHTML = "🎙️";
+      isRecording = false;
+    }
+
+    function buildRecognition() {
+      const r = new SR();
+      r.lang = "en-US";
+      r.continuous = false;          // stop automatically after pause
+      r.interimResults = true;
+      r.maxAlternatives = 1;
+
+      r.onstart = () => {
+        // onstart fires AFTER permission is granted and mic is open
+        permissionGranted = true;
+        isRecording = true;
+        statusEl.textContent = "Listening… speak now";
+        statusEl.className = "vm-status active";
+      };
+
+      r.onresult = (e) => {
+        let interim = "";
+        finalTranscript = "";
+        for (let i = 0; i < e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) finalTranscript += t + " ";
+          else interim += t;
+        }
+        const box = document.getElementById("vmTranscript");
+        box.classList.add("visible");
+        box.innerHTML = `<span style="color:var(--text-3);font-size:11px;letter-spacing:.6px;text-transform:uppercase;display:block;margin-bottom:6px;">You said:</span>${finalTranscript}<span style="opacity:0.5">${interim}</span>`;
+      };
+
+      r.onerror = (e) => {
+        resetUI();
+        const msgs = {
+          "not-allowed":  "Microphone blocked. Click the padlock in the address bar to allow mic access.",
+          "no-speech":    "No speech detected. Please try again.",
+          "network":      "Network error — check your connection.",
+          "aborted":      "Recording stopped.",
+          "audio-capture":"No microphone found."
+        };
+        statusEl.textContent = msgs[e.error] || `Error: ${e.error}`;
+        statusEl.className = "vm-status";
+      };
+
+      r.onend = () => {
+        resetUI();
+        const text = finalTranscript.trim();
+
+        // Edge/Chrome fires onend with no results on the FIRST click when it's
+        // asking for permission. If so, just update the status and let the user click again.
+        if (!text) {
+          if (!permissionGranted) {
+            statusEl.textContent = "Permission requested — click mic again to start.";
+          } else {
+            statusEl.textContent = "Nothing heard. Tap mic and try again.";
+          }
+          statusEl.className = "vm-status";
+          return;
+        }
+
+        const mood = detectMood(text);
+        statusEl.textContent = "Mood detected!";
+        statusEl.className = "vm-status detected";
+        showResults(mood, text);
+      };
+
+      return r;
+    }
+
+    function startRecording() {
+      if (isRecording) {
+        recognition.stop();
+        return;
+      }
+
+      // Always create a fresh instance — avoids Edge's "already started" silent bug
+      recognition = buildRecognition();
+      finalTranscript = "";
+
+      micBtn.classList.add("recording");
+      orbWrap.classList.add("orb-recording");
+      micBtn.innerHTML = "⏹️";
+      statusEl.textContent = "Waiting for mic permission…";
+      statusEl.className = "vm-status active";
+
+      document.getElementById("vmResults").innerHTML = "";
+      document.getElementById("vmBadge").classList.remove("show");
+      document.getElementById("vmTranscript").classList.remove("visible");
+      document.getElementById("retryRow").style.display = "none";
+
+      try {
+        recognition.start();
+      } catch (err) {
+        resetUI();
+        statusEl.textContent = "Could not start mic. Try again.";
+        statusEl.className = "vm-status";
+      }
+    }
+
+    micBtn.addEventListener("click", startRecording);
+    document.getElementById("retryBtn").addEventListener("click", startRecording);
+  }
+});
+</script>
+
+<a class="mic-float" href="voice-mood.html" title="Voice Mood Detector">🎙️</a>
+</body>
+</html>

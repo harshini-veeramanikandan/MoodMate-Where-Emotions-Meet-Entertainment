@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoodMate — Details</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="dark">
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <img src="image.png" alt="MoodMate Logo" class="logo">
+      <h1>MoodMate</h1>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="playlists.html">Playlists</a>
+      <a href="movies.html">Movies</a>
+      <a href="music.html">Music</a>
+      <a href="games.html">Games</a>
+      <a href="voice-mood.html">🎙️ Voice</a>
+      <a href="streak.html">🔥 Streak</a>
+      <a href="profile.html">Profile</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <!-- Main layout: content left, detail panel right -->
+  <div class="header" id="detailLayout">
+    <!-- LEFT: poster + actions + extras -->
+    <div class="detail-hero" id="detailHero">
+      <div class="detail-poster" id="detailPoster">
+        <div class="detail-poster-placeholder">🎬</div>
+      </div>
+      <h1 class="detail-title" id="detailTitle">Loading…</h1>
+      <p class="detail-meta" id="detailSubtitle"></p>
+      <div class="detail-actions" id="detailActions"></div>
+    </div>
+
+    <!-- RIGHT: info panel -->
+    <div class="summary" id="detailPanel">
+      <h3>Details</h3>
+      <div id="detailInfoCards"></div>
+    </div>
+  </div>
+
+  <!-- Extras section below -->
+  <section class="section" id="extraSection" style="display:none">
+    <h3 id="extraTitle">More like this</h3>
+    <div id="extras" class="grid"></div>
+  </section>
+</div>
+
+<footer class="footer">© MoodMate — details</footer>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  renderNavUser();
+  mountFavoriteHandler(document.body);
+
+  const params = new URLSearchParams(window.location.search);
+  const id     = params.get("id");
+
+  const detailTitle    = document.getElementById("detailTitle");
+  const detailSubtitle = document.getElementById("detailSubtitle");
+  const detailActions  = document.getElementById("detailActions");
+  const detailPoster   = document.getElementById("detailPoster");
+  const detailInfoCards= document.getElementById("detailInfoCards");
+  const extras         = document.getElementById("extras");
+  const extraSection   = document.getElementById("extraSection");
+  const extraTitle     = document.getElementById("extraTitle");
+
+  function infoCard(label, value) {
+    return `
+      <div class="detail-info-card">
+        <div class="detail-info-label">${label}</div>
+        <div class="detail-info-value">${value}</div>
+      </div>
+    `;
+  }
+
+  function notFound(msg) {
+    detailTitle.textContent = "Item not found";
+    detailSubtitle.textContent = msg || "The link may be invalid or the item was removed.";
+    detailActions.innerHTML = `<a class="btn" href="playlists.html">← Back to Playlists</a>`;
+    if (extraSection) extraSection.style.display = "none";
+  }
+
+  if (!id) { notFound("No item ID provided."); return; }
+
+  const found = findItemById(id);
+  if (!found) { notFound(); return; }
+
+  const { type, mood, data } = found;
+  applyMoodTheme(mood);
+
+  if (type === "movie") {
+    document.title = `${data.title} — MoodMate`;
+    detailTitle.textContent = data.title;
+    detailSubtitle.textContent = [
+      data.year,
+      data.lang,
+      data.rating ? `★ ${data.rating}` : null,
+      mood ? `Mood: ${mood}` : null
+    ].filter(Boolean).join(" · ");
+
+    // Poster (16:9)
+    detailPoster.innerHTML = data.poster
+      ? `<img src="${data.poster}" alt="${data.title}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-lg);">`
+      : `<span class="detail-poster-placeholder">🎬</span>`;
+
+    const fav = isFavorite({ type: "movie", title: data.title, year: data.year });
+    detailActions.innerHTML = `
+      ${data.imdb ? `<a class="btn primary" href="${data.imdb}" target="_blank" rel="noopener">View on IMDb ↗</a>` : ""}
+      <button class="btn ${fav ? "success" : ""}" data-role="fav" data-type="movie" data-title="${data.title}" data-year="${data.year || ""}">${fav ? "♥ Saved" : "♡ Save"}</button>
+      <a class="btn" href="movies.html?mood=${encodeURIComponent(mood)}">More ${mood} movies</a>
+    `;
+
+    // Right panel info cards — movie details
+    detailInfoCards.innerHTML = `
+  ${infoCard("Synopsis", data.synopsis || "No description provided yet.")}
+  ${infoCard("OTT Availability", data.ott || "Not specified.")}
+  ${infoCard("Genres & Runtime", `${data.genres || "—"} · ${data.runtime || "—"}`)}
+  ${infoCard("Language", data.lang || "—")}
+  ${infoCard("Year", data.year || "—")}
+  ${infoCard("IMDb Rating", data.rating ? `★ ${data.rating} / 10` : "—")}
+  ${infoCard("Mood", `<span style="text-transform:capitalize;font-weight:600">${mood}</span>`)}
+  <a class="btn" style="width:100%;margin-top:8px;" href="playlists.html?mood=${encodeURIComponent(mood)}&type=movies">Explore ${mood} playlist ↗</a>
+`;
+
+    const moreMovies = (moodData[mood]?.movies || []).filter(m => m.title !== data.title).slice(0, 6);
+    if (moreMovies.length) {
+      extraSection.style.display = "block";
+      extraTitle.textContent = `More ${mood} movies`;
+      extras.innerHTML = moreMovies.map(m => movieCard(m, mood)).join("");
+    }
+
+  } else {
+    // Music
+    document.title = `${data.title} — MoodMate`;
+    detailTitle.textContent = data.title;
+    detailSubtitle.textContent = [
+      data.artist,
+      data.year,
+      mood ? `Mood: ${mood}` : null
+    ].filter(Boolean).join(" · ");
+
+    // Cover (16:9)
+    detailPoster.innerHTML = data.cover
+      ? `<img src="${data.cover}" alt="${data.title}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-lg);">`
+      : `<span class="detail-poster-placeholder">🎵</span>`;
+
+    const fav = isFavorite({ type: "music", title: data.title, artist: data.artist || "", year: data.year });
+    detailActions.innerHTML = `
+      ${data.link ? `<a class="btn primary" href="${data.link}" target="_blank" rel="noopener">▶ Listen on Spotify</a>` : ""}
+      <button class="btn ${fav ? "success" : ""}" data-role="fav" data-type="music" data-title="${data.title}" data-artist="${data.artist || ""}" data-year="${data.year || ""}">${fav ? "♥ Saved" : "♡ Save"}</button>
+      <a class="btn" href="music.html?mood=${encodeURIComponent(mood)}">More ${mood} music</a>
+    `;
+
+    // Right panel info cards — music details
+    detailInfoCards.innerHTML = `
+      ${infoCard("Artist", data.artist || "Unknown artist")}
+      ${infoCard("Album / Release", data.album || "Not specified.")}
+      ${infoCard("Lyrics Excerpt", data.lyrics || "No lyrics provided yet.")}
+      ${infoCard("Year & Genre", data.genre || (data.year ? `${data.year} · —` : "— · —"))}
+      ${infoCard("Mood", `<span style="text-transform:capitalize;font-weight:600">${mood}</span>`)}
+      <a class="btn" style="width:100%;margin-top:8px;" href="playlists.html?mood=${encodeURIComponent(mood)}&type=music">Explore ${mood} playlist ↗</a>
+    `;
+
+    const moreTracks = (moodData[mood]?.music || []).filter(t => t.title !== data.title).slice(0, 6);
+    if (moreTracks.length) {
+      extraSection.style.display = "block";
+      extraTitle.textContent = `More ${mood} music`;
+      extras.innerHTML = moreTracks.map(t => musicCard(t, mood)).join("");
+    }
+  }
+});
+</script>
+
+<a class="mic-float" href="voice-mood.html" title="Voice Mood Detector">🎙️</a>
+</body>
+</html>

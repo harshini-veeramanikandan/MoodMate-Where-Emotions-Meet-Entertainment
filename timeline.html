@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mood Timeline — MoodMate</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="dark">
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <img src="image.png" alt="MoodMate Logo" class="logo">
+      <h1>MoodMate</h1>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="playlists.html">Playlists</a>
+      <a href="movies.html">Movies</a>
+      <a href="music.html">Music</a>
+      <a href="games.html" class="active">Games</a>
+      <a href="voice-mood.html">🎙️ Voice</a>
+      <a href="streak.html">🔥 Streak</a>
+      <a href="profile.html">Profile</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="header">
+    <!-- LEFT: timeline builder -->
+    <div class="hero">
+      <h2>🧠 Mood Timeline</h2>
+      <p>Build your day: choose a mood for Morning, Afternoon, and Night — get curated picks for each.</p>
+
+      <div class="grid" style="margin-bottom:20px;">
+        <div class="card"><div class="body">
+          <div class="title">🌅 Morning</div>
+          <select id="morning" class="select" style="width:100%;margin-top:8px;">
+            <option value="happy">😊 Happy</option>
+            <option value="energetic">⚡ Energetic</option>
+            <option value="relaxed">🌿 Relaxed</option>
+          </select>
+        </div></div>
+        <div class="card"><div class="body">
+          <div class="title">☀️ Afternoon</div>
+          <select id="afternoon" class="select" style="width:100%;margin-top:8px;">
+            <option value="romantic">❤️ Romantic</option>
+            <option value="happy">😊 Happy</option>
+            <option value="sad">😢 Sad</option>
+          </select>
+        </div></div>
+        <div class="card"><div class="body">
+          <div class="title">🌙 Night</div>
+          <select id="night" class="select" style="width:100%;margin-top:8px;">
+            <option value="relaxed">🌿 Relaxed</option>
+            <option value="scared">😱 Scared</option>
+            <option value="sad">😢 Sad</option>
+          </select>
+        </div></div>
+      </div>
+
+      <div class="toolbar">
+        <button id="buildBtn" class="btn primary">🗓️ Build my timeline</button>
+      </div>
+
+      <div class="section">
+        <h3>Your Day's Picks</h3>
+        <div id="timelineResults" class="grid"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: tips panel -->
+    <div class="summary">
+      <h3>How it works</h3>
+      <p style="color:var(--text-2);font-size:14px;margin-bottom:16px;">Choose a mood for each part of your day. We'll pick one movie and one song for each slot.</p>
+      <h3>Tip</h3>
+      <p style="color:var(--text-2);font-size:14px;margin-bottom:16px;">Save any pick as a Favorite — it'll appear in your Playlists page.</p>
+      <a class="btn" href="games.html">← Back to Games</a>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">© MoodMate — timeline</footer>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+<script src="timeline.js"></script>
+
+<a class="mic-float" href="voice-mood.html" title="Voice Mood Detector">🎙️</a>
+</body>
+</html>

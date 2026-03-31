@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Emotion Decoder — MoodMate</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="dark">
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <img src="image.png" alt="MoodMate Logo" class="logo">
+      <h1>MoodMate</h1>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="playlists.html">Playlists</a>
+      <a href="movies.html">Movies</a>
+      <a href="music.html">Music</a>
+      <a href="games.html" class="active">Games</a>
+      <a href="voice-mood.html">🎙️ Voice</a>
+      <a href="streak.html">🔥 Streak</a>
+      <a href="profile.html">Profile</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="header">
+    <!-- LEFT: game content -->
+    <div class="hero">
+      <h2>🧠 Emotion Decoder</h2>
+      <p>Type one sentence. We highlight keywords and decode your mood.</p>
+      <div class="toolbar">
+        <input id="sentence" class="input" placeholder="e.g., I feel tired but hopeful" style="flex:1;" />
+        <button id="decodeBtn" class="btn primary">Decode</button>
+      </div>
+      <div class="section">
+        <h3>Result</h3>
+        <div id="decodedMood" class="meta" style="font-size:18px;font-weight:600;margin-bottom:20px;"></div>
+        <div id="results" class="grid"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: keywords panel -->
+    <div class="summary">
+      <h3>Mood Keywords</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="detail-info-card">
+          <div class="detail-info-label">😊 Happy</div>
+          <div class="detail-info-value">happy, joy, excited, grateful</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label">😢 Sad</div>
+          <div class="detail-info-value">sad, low, down, tired, lonely</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label">❤️ Romantic</div>
+          <div class="detail-info-value">love, romance, heart, crush</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label">🌿 Relaxed</div>
+          <div class="detail-info-value">calm, peace, relax, chill</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label">😱 Scared</div>
+          <div class="detail-info-value">scared, anxious, afraid, fear</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label">⚡ Energetic</div>
+          <div class="detail-info-value">hype, energy, pumped, wild</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;">
+        <a class="btn" href="games.html">← Back to Games</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">© MoodMate — emotion decoder</footer>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+<script src="emotion-decoder.js"></script>
+
+<a class="mic-float" href="voice-mood.html" title="Voice Mood Detector">🎙️</a>
+</body>
+</html>

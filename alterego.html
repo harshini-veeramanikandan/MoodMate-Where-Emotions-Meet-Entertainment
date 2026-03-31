@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Alter-Ego Mood — MoodMate</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="dark">
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <img src="image.png" alt="MoodMate Logo" class="logo">
+      <h1>MoodMate</h1>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="playlists.html">Playlists</a>
+      <a href="movies.html">Movies</a>
+      <a href="music.html">Music</a>
+      <a href="games.html" class="active">Games</a>
+      <a href="voice-mood.html">🎙️ Voice</a>
+      <a href="streak.html">🔥 Streak</a>
+      <a href="profile.html">Profile</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="header">
+    <!-- LEFT: game content -->
+    <div class="hero">
+      <h2>🔥 Alter-Ego Mood</h2>
+      <p>If you were a character today… who are you? Pick your alter-ego to get matched picks.</p>
+      <div class="grid" id="alterGrid"></div>
+      <div class="section">
+        <h3>Your Picks</h3>
+        <div id="results" class="grid"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: archetypes panel -->
+    <div class="summary">
+      <h3>Archetypes</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+        <div class="detail-info-card">
+          <div class="detail-info-label">Main Character</div>
+          <div class="detail-info-value">Happy, upbeat, living your best life.</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label">Villain Arc</div>
+          <div class="detail-info-value">Tense, dramatic, morally grey energy.</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label">Soft Girl / Boy</div>
+          <div class="detail-info-value">Romantic, gentle, dreamy vibes.</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label">Chaos Gremlin</div>
+          <div class="detail-info-value">Pure energy, unpredictable, wild.</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label">Overthinking Pro Max</div>
+          <div class="detail-info-value">Reflective, melancholic, deep in thought.</div>
+        </div>
+      </div>
+      <a class="btn" href="games.html">← Back to Games</a>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">© MoodMate — alter-ego</footer>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+<script src="alterego.js"></script>
+
+<a class="mic-float" href="voice-mood.html" title="Voice Mood Detector">🎙️</a>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoodMate — Playlists</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="dark">
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <img src="image.png" alt="MoodMate Logo" class="logo">
+      <h1>MoodMate</h1>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="playlists.html" class="active">Playlists</a>
+      <a href="movies.html">Movies</a>
+      <a href="music.html">Music</a>
+      <a href="games.html">Games</a>
+      <a href="voice-mood.html">🎙️ Voice</a>
+      <a href="streak.html">🔥 Streak</a>
+      <a href="profile.html">Profile</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <!-- Filters bar -->
+  <div class="page-hero-banner" style="background:linear-gradient(135deg,rgba(124,92,252,0.12) 0%,rgba(0,212,200,0.05) 100%),var(--surface);">
+    <h2>Explore Playlists</h2>
+    <p>Filter by mood, type, language, year, and rating. Click any card for full details.</p>
+    <div class="toolbar">
+      <select id="mood" class="select">
+        <option value="">Any mood</option>
+        <option value="happy">😊 Happy</option>
+        <option value="sad">😢 Sad</option>
+        <option value="romantic">❤️ Romantic</option>
+        <option value="relaxed">🌿 Relaxed</option>
+        <option value="scared">😱 Scared</option>
+        <option value="energetic">⚡ Energetic</option>
+      </select>
+      <select id="type" class="select">
+        <option value="movies">🎬 Movies</option>
+        <option value="music">🎵 Music</option>
+      </select>
+      <input id="search" class="input" placeholder="Search title or artist…" style="min-width:200px;" />
+      <select id="language" class="select">
+        <option value="">Any language</option>
+        <option value="English">English</option>
+        <option value="French">French</option>
+        <option value="Japanese">Japanese</option>
+      </select>
+      <select id="minYear" class="select">
+        <option value="">Min year</option>
+        <option>1980</option><option>1990</option><option>2000</option><option>2010</option><option>2020</option>
+      </select>
+      <select id="minRating" class="select">
+        <option value="">Min rating</option>
+        <option>6.5</option><option>7.0</option><option>7.5</option><option>8.0</option><option>8.5</option>
+      </select>
+      <button id="clear" class="btn">✕ Clear</button>
+    </div>
+  </div>
+
+  <!-- Main + sidebar -->
+  <div style="display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start">
+    <!-- Results -->
+    <div>
+      <div class="count-label" id="listTitle"></div>
+      <div id="results" class="grid"></div>
+    </div>
+
+    <!-- Favorites panel (right side) -->
+    <div style="position:sticky;top:80px;">
+      <div class="summary">
+        <h3>Your Favorites</h3>
+        <p class="meta" style="margin-bottom:14px;font-size:12px;">Items you've saved while browsing.</p>
+        <div id="favoritesList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">© MoodMate — Playlists</footer>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+<script src="playlists.js"></script>
+
+<a class="mic-float" href="voice-mood.html" title="Voice Mood Detector">🎙️</a>
+</body>
+</html>

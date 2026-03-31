@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoodMate — Mood Streak</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── STREAK SPECIFIC STYLES ── */
+    .streak-hero {
+      background: linear-gradient(135deg, rgba(124,92,252,0.13) 0%, rgba(0,212,200,0.06) 100%), var(--surface);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      padding: 44px;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    .streak-hero::before {
+      content: '🔥';
+      position: absolute; right: 40px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 120px; opacity: 0.06; pointer-events: none;
+    }
+    .streak-hero h2 {
+      font-size: 36px; font-weight: 700; margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff 50%, var(--text-2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .streak-hero p { color: var(--text-2); font-size: 15px; margin-bottom: 28px; }
+
+    /* ── STREAK COUNTER ── */
+    .streak-counter-wrap {
+      display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 28px;
+    }
+    .streak-stat {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 24px 36px;
+      text-align: center;
+      min-width: 140px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .streak-stat:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
+    .streak-stat-number {
+      font-family: var(--font-display);
+      font-size: 52px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .streak-stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-3);
+      font-family: var(--font-display);
+    }
+    .streak-stat.fire .streak-stat-number { color: #ff6b35; text-shadow: 0 0 24px rgba(255,107,53,0.5); }
+    .streak-stat.best .streak-stat-number { color: var(--happy); text-shadow: 0 0 24px rgba(255,217,61,0.4); }
+    .streak-stat.total .streak-stat-number { color: var(--accent-2); text-shadow: 0 0 24px rgba(0,212,200,0.4); }
+
+    /* ── FLAME ANIMATION ── */
+    @keyframes flamePulse {
+      0%,100% { transform: scale(1) rotate(-2deg); }
+      50%      { transform: scale(1.15) rotate(2deg); }
+    }
+    .flame-icon { display: inline-block; animation: flamePulse 1.8s ease-in-out infinite; }
+
+    /* ── LOG MOOD SECTION ── */
+    .log-section {
+      background: linear-gradient(135deg, rgba(124,92,252,0.08) 0%, rgba(0,212,200,0.03) 100%), var(--surface);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .log-section h3 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .log-section .sub { color: var(--text-2); font-size: 14px; margin-bottom: 24px; }
+
+    .mood-log-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .mood-log-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; padding: 18px 8px;
+      border: 2px solid var(--glass-border);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.025);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(.2,.8,.2,1);
+      font-family: var(--font-body);
+    }
+    .mood-log-btn:hover { transform: translateY(-4px); background: rgba(255,255,255,0.05); }
+    .mood-log-btn.selected { border-color: var(--accent); background: rgba(124,92,252,0.15); }
+    .mood-log-btn[data-mood="happy"].selected    { border-color: var(--happy);    background: rgba(255,217,61,0.12); }
+    .mood-log-btn[data-mood="sad"].selected      { border-color: var(--sad);      background: rgba(116,179,247,0.12); }
+    .mood-log-btn[data-mood="romantic"].selected { border-color: var(--romantic); background: rgba(255,107,157,0.12); }
+    .mood-log-btn[data-mood="relaxed"].selected  { border-color: var(--relaxed);  background: rgba(107,203,119,0.12); }
+    .mood-log-btn[data-mood="scared"].selected   { border-color: var(--scared);   background: rgba(248,160,90,0.12); }
+    .mood-log-btn[data-mood="energetic"].selected{ border-color: var(--energetic);background: rgba(255,71,87,0.12); }
+    .mood-log-emoji { font-size: 28px; filter: drop-shadow(0 0 8px rgba(255,255,255,0.15)); }
+    .mood-log-label { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-2); font-family: var(--font-display); }
+
+    .log-note-wrap { display: flex; gap: 10px; margin-bottom: 16px; }
+    .log-note-wrap .input { flex: 1; }
+
+    .already-logged {
+      display: none; align-items: center; gap: 10px;
+      background: rgba(0,212,160,0.1); border: 1px solid rgba(0,212,160,0.25);
+      border-radius: var(--radius); padding: 12px 18px;
+      color: var(--ok); font-size: 14px; font-weight: 500; margin-top: 10px;
+    }
+    .already-logged.show { display: flex; }
+
+    /* ── CALENDAR HEATMAP ── */
+    .calendar-section {
+      background: var(--surface);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      margin-bottom: 28px;
+    }
+    .calendar-section h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .calendar-section .sub { color: var(--text-2); font-size: 13px; margin-bottom: 24px; }
+
+    .cal-month-label {
+      font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-3); font-family: var(--font-display); margin-bottom: 10px;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-bottom: 20px;
+    }
+    .cal-day-label {
+      font-size: 10px; text-align: center; color: var(--text-3);
+      font-family: var(--font-display); letter-spacing: 0.05em;
+      padding-bottom: 4px;
+    }
+    .cal-cell {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.02);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: var(--text-3);
+      cursor: default;
+      transition: transform 0.15s;
+      position: relative;
+    }
+    .cal-cell.has-log {
+      border-color: rgba(255,255,255,0.1);
+      cursor: pointer;
+    }
+    .cal-cell.has-log:hover { transform: scale(1.18); z-index: 2; }
+    .cal-cell.today { box-shadow: 0 0 0 2px var(--accent); }
+    .cal-cell.mood-happy    { background: rgba(255,217,61,0.22);  border-color: rgba(255,217,61,0.4); }
+    .cal-cell.mood-sad      { background: rgba(116,179,247,0.22); border-color: rgba(116,179,247,0.4); }
+    .cal-cell.mood-romantic { background: rgba(255,107,157,0.22); border-color: rgba(255,107,157,0.4); }
+    .cal-cell.mood-relaxed  { background: rgba(107,203,119,0.22); border-color: rgba(107,203,119,0.4); }
+    .cal-cell.mood-scared   { background: rgba(248,160,90,0.22);  border-color: rgba(248,160,90,0.4); }
+    .cal-cell.mood-energetic{ background: rgba(255,71,87,0.22);   border-color: rgba(255,71,87,0.4); }
+
+    .cal-cell .cell-emoji { font-size: 14px; line-height: 1; }
+
+    /* cal tooltip */
+    .cal-cell .cal-tip {
+      display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+      background: var(--surface-2); border: 1px solid var(--glass-border); border-radius: 8px;
+      padding: 6px 10px; font-size: 11px; white-space: nowrap; color: var(--text); z-index: 10;
+      pointer-events: none;
+    }
+    .cal-cell:hover .cal-tip { display: block; }
+
+    /* ── HISTORY LIST ── */
+    .history-section {
+      background: var(--surface);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      margin-bottom: 28px;
+    }
+    .history-section h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .history-section .sub { color: var(--text-2); font-size: 13px; margin-bottom: 20px; }
+
+    .history-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: background 0.15s;
+    }
+    .history-item:last-child { border-bottom: none; }
+    .history-date {
+      font-family: var(--font-display); font-size: 12px; font-weight: 600;
+      color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em;
+      min-width: 90px;
+    }
+    .history-emoji { font-size: 22px; }
+    .history-mood {
+      font-weight: 600; font-size: 14px; text-transform: capitalize;
+      font-family: var(--font-display); min-width: 80px;
+    }
+    .history-note { font-size: 13px; color: var(--text-2); flex: 1; font-style: italic; }
+    .history-del {
+      background: none; border: none; cursor: pointer; color: var(--text-3);
+      font-size: 16px; padding: 4px 8px; border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .history-del:hover { color: var(--danger); background: rgba(255,71,87,0.1); }
+
+    /* ── MOOD DISTRIBUTION ── */
+    .dist-section {
+      background: var(--surface);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      margin-bottom: 28px;
+    }
+    .dist-section h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .dist-section .sub { color: var(--text-2); font-size: 13px; margin-bottom: 24px; }
+
+    .dist-bar-row {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+    }
+    .dist-label { font-size: 13px; font-weight: 600; min-width: 90px; display: flex; align-items: center; gap: 6px; }
+    .dist-track {
+      flex: 1; height: 10px; background: rgba(255,255,255,0.05);
+      border-radius: 99px; overflow: hidden;
+    }
+    .dist-fill {
+      height: 100%; border-radius: 99px;
+      transition: width 0.8s cubic-bezier(.2,.8,.2,1);
+    }
+    .dist-count { font-size: 12px; color: var(--text-3); min-width: 30px; text-align: right; }
+    .dist-happy    .dist-fill { background: var(--happy); }
+    .dist-sad      .dist-fill { background: var(--sad); }
+    .dist-romantic .dist-fill { background: var(--romantic); }
+    .dist-relaxed  .dist-fill { background: var(--relaxed); }
+    .dist-scared   .dist-fill { background: var(--scared); }
+    .dist-energetic .dist-fill { background: var(--energetic); }
+
+    /* ── ACHIEVEMENTS / BADGES ── */
+    .badges-section {
+      background: var(--surface);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      margin-bottom: 28px;
+    }
+    .badges-section h3 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .badges-section .sub { color: var(--text-2); font-size: 13px; margin-bottom: 24px; }
+
+    .badges-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .badge-card {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 20px 14px;
+      text-align: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .badge-card.unlocked {
+      border-color: rgba(255,217,61,0.4);
+      background: rgba(255,217,61,0.06);
+      box-shadow: 0 0 20px rgba(255,217,61,0.1);
+    }
+    .badge-card:hover { transform: translateY(-3px); }
+    .badge-icon { font-size: 32px; margin-bottom: 8px; display: block; filter: grayscale(1) opacity(0.3); }
+    .badge-card.unlocked .badge-icon { filter: none; }
+    .badge-name { font-size: 12px; font-weight: 700; font-family: var(--font-display); letter-spacing: 0.03em; color: var(--text-2); margin-bottom: 4px; }
+    .badge-card.unlocked .badge-name { color: var(--text); }
+    .badge-desc { font-size: 11px; color: var(--text-3); line-height: 1.4; }
+    .badge-card.unlocked .badge-desc { color: var(--text-2); }
+
+    /* ── SIDEBAR EXTRAS ── */
+    .sidebar-streak-tip {
+      background: rgba(124,92,252,0.08);
+      border: 1px solid rgba(124,92,252,0.2);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .sidebar-streak-tip p { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+
+    .today-mood-display {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 16px; text-align: center; margin-bottom: 14px;
+    }
+    .today-mood-display .tmood-emoji { font-size: 36px; display: block; margin-bottom: 6px; }
+    .today-mood-display .tmood-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-3); font-family: var(--font-display); }
+    .today-mood-display .tmood-value { font-size: 16px; font-weight: 700; font-family: var(--font-display); text-transform: capitalize; margin-top: 2px; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 90px; right: 28px; z-index: 9999;
+      background: var(--surface-2); border: 1px solid var(--glass-border);
+      border-radius: var(--radius); padding: 14px 20px;
+      font-size: 14px; color: var(--text); font-weight: 500;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      transform: translateY(20px); opacity: 0;
+      transition: all 0.35s cubic-bezier(.2,.8,.2,1);
+      pointer-events: none; max-width: 300px;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── WEEKLY SUMMARY BAR ── */
+    .weekly-row {
+      display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; margin-top: 16px;
+    }
+    .weekly-slot {
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+    }
+    .weekly-dot {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      transition: transform 0.2s;
+    }
+    .weekly-dot.logged { border-color: rgba(255,255,255,0.15); }
+    .weekly-dot:hover { transform: scale(1.15); }
+    .weekly-day-lbl { font-size: 10px; color: var(--text-3); font-family: var(--font-display); letter-spacing: 0.05em; text-transform: uppercase; }
+
+    @media(max-width:900px){
+      .mood-log-grid { grid-template-columns: repeat(3,1fr); }
+      .badges-grid { grid-template-columns: repeat(2,1fr); }
+    }
+    @media(max-width:600px){
+      .streak-counter-wrap { gap: 12px; }
+      .streak-stat { padding: 18px 24px; }
+      .streak-stat-number { font-size: 40px; }
+      .mood-log-grid { grid-template-columns: repeat(3,1fr); }
+      .badges-grid { grid-template-columns: repeat(2,1fr); }
+      .streak-hero::before { display:none; }
+    }
+  </style>
+</head>
+<body class="dark">
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <img src="image.png" alt="MoodMate Logo" class="logo">
+      <h1>MoodMate</h1>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="playlists.html">Playlists</a>
+      <a href="movies.html">Movies</a>
+      <a href="music.html">Music</a>
+      <a href="games.html">Games</a>
+      <a href="voice-mood.html">🎙️ Voice</a>
+      <a href="streak.html" class="active">🔥 Streak</a>
+      <a href="profile.html">Profile</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ── HERO ── -->
+  <div class="streak-hero">
+    <h2><span class="flame-icon">🔥</span> Mood Streak</h2>
+    <p>Log your mood every day to build your streak. Don't break the chain!</p>
+    <div class="streak-counter-wrap" id="streakCounters">
+      <!-- injected by JS -->
+    </div>
+    <!-- THIS WEEK mini bar -->
+    <div style="max-width:420px; margin:0 auto;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-3);font-family:var(--font-display);margin-bottom:10px;">This Week</div>
+      <div class="weekly-row" id="weeklyRow"></div>
+    </div>
+  </div>
+
+  <!-- ── MAIN CONTENT + SIDEBAR ── -->
+  <div class="header">
+    <!-- LEFT COLUMN -->
+    <div>
+
+      <!-- LOG TODAY'S MOOD -->
+      <div class="log-section">
+        <h3>Log Today's Mood</h3>
+        <p class="sub" id="logDateLabel">How are you feeling today?</p>
+        <div class="mood-log-grid" id="moodLogGrid">
+          <!-- injected by JS -->
+        </div>
+        <div class="log-note-wrap">
+          <input type="text" id="moodNote" class="input" placeholder="Add a note… (optional)" maxlength="120" />
+          <button class="btn primary" id="logBtn">✓ Log Mood</button>
+        </div>
+        <div class="already-logged" id="alreadyLogged">
+          ✅ You've already logged your mood today — come back tomorrow!
+        </div>
+      </div>
+
+      <!-- CALENDAR HEATMAP -->
+      <div class="calendar-section">
+        <h3>Mood Calendar</h3>
+        <p class="sub">Every logged day gets a color. Build your streak by filling the calendar.</p>
+        <div id="calendarWrap"></div>
+      </div>
+
+      <!-- MOOD DISTRIBUTION -->
+      <div class="dist-section">
+        <h3>Mood Distribution</h3>
+        <p class="sub">How often you've logged each mood, all time.</p>
+        <div id="distBars"></div>
+        <p class="meta" id="distEmpty" style="display:none;text-align:center;padding:20px 0;opacity:0.5;">Log some moods to see your distribution.</p>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="history-section">
+        <h3>Log History</h3>
+        <p class="sub">Your last 30 entries. Click 🗑 to delete.</p>
+        <div id="historyList"></div>
+        <p class="meta" id="historyEmpty" style="display:none;text-align:center;padding:24px 0;opacity:0.5;">No mood logs yet. Start today!</p>
+      </div>
+
+      <!-- ACHIEVEMENTS -->
+      <div class="badges-section">
+        <h3>Achievements</h3>
+        <p class="sub">Unlock badges by building your streak and logging moods.</p>
+        <div class="badges-grid" id="badgesGrid"></div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div>
+      <!-- today's mood summary -->
+      <div class="summary" style="margin-bottom:16px;">
+        <h3>Today's Mood</h3>
+        <div class="today-mood-display" id="todayDisplay">
+          <span class="tmood-emoji">😶</span>
+          <div class="tmood-label">Status</div>
+          <div class="tmood-value" id="todayMoodValue">Not logged yet</div>
+        </div>
+        <div class="sidebar-streak-tip">
+          <p>💡 Logging your mood daily builds self-awareness. Even one word counts!</p>
+        </div>
+        <a class="btn primary" style="width:100%;margin-bottom:10px;" href="playlists.html">🎧 Get mood picks</a>
+        <a class="btn" style="width:100%;margin-bottom:10px;" href="voice-mood.html">🎙️ Detect via voice</a>
+        <a class="btn" style="width:100%;" href="emotion-decoder.html">🧠 Decode emotion</a>
+      </div>
+
+      <!-- streak tips -->
+      <div class="summary">
+        <h3>Streak Rules</h3>
+        <div class="detail-info-card">
+          <div class="detail-info-label">One log per day</div>
+          <div class="detail-info-value">Log once each calendar day to keep the streak alive.</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label">Streak breaks</div>
+          <div class="detail-info-value">Missing a day resets your current streak to 0.</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label">Best streak</div>
+          <div class="detail-info-value">Your all-time high is saved and never resets.</div>
+        </div>
+        <div class="detail-info-card">
+          <div class="detail-info-label">Get picks</div>
+          <div class="detail-info-value">Each logged mood links to curated movies &amp; music.</div>
+        </div>
+        <div style="margin-top:14px;">
+          <a class="btn" href="games.html" style="width:100%;">🎮 Games</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<footer class="footer">© MoodMate — Mood Streak</footer>
+<a class="mic-float" href="voice-mood.html" title="Voice Mood Detector">🎙️</a>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  renderNavUser();
+  mountFavoriteHandler(document.body);
+
+  /* ──────────────────────────────────────────
+     STORAGE
+  ────────────────────────────────────────── */
+  const STREAK_KEY = "moodmate:streak:logs"; // [{date:"2025-07-04", mood:"happy", note:"..."}]
+
+  function getLogs() {
+    try { const r = localStorage.getItem(STREAK_KEY); return r ? JSON.parse(r) : []; }
+    catch { return []; }
+  }
+  function saveLogs(logs) { localStorage.setItem(STREAK_KEY, JSON.stringify(logs)); }
+
+  function todayStr() {
+    const d = new Date(); 
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+
+  function dateLabel(str) {
+    const [y,m,d] = str.split("-").map(Number);
+    return new Date(y,m-1,d).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+  }
+
+  /* ──────────────────────────────────────────
+     STREAK CALCULATION
+  ────────────────────────────────────────── */
+  function calcStreak(logs) {
+    if (!logs.length) return { current: 0, best: 0, total: logs.length };
+    const dates = [...new Set(logs.map(l => l.date))].sort().reverse();
+    const today = todayStr();
+    const yesterday = (() => { const d = new Date(); d.setDate(d.getDate()-1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; })();
+
+    // current streak — must include today or yesterday to be alive
+    let current = 0;
+    if (dates[0] === today || dates[0] === yesterday) {
+      current = 1;
+      let prev = dates[0];
+      for (let i = 1; i < dates.length; i++) {
+        const [py,pm,pd] = prev.split("-").map(Number);
+        const prevDate = new Date(py,pm-1,pd);
+        prevDate.setDate(prevDate.getDate()-1);
+        const expected = `${prevDate.getFullYear()}-${String(prevDate.getMonth()+1).padStart(2,"0")}-${String(prevDate.getDate()).padStart(2,"0")}`;
+        if (dates[i] === expected) { current++; prev = dates[i]; }
+        else break;
+      }
+    }
+
+    // best streak
+    let best = 1, run = 1;
+    for (let i = 1; i < dates.length; i++) {
+      const [py,pm,pd] = dates[i-1].split("-").map(Number);
+      const prevDate = new Date(py,pm-1,pd);
+      prevDate.setDate(prevDate.getDate()-1);
+      const expected = `${prevDate.getFullYear()}-${String(prevDate.getMonth()+1).padStart(2,"0")}-${String(prevDate.getDate()).padStart(2,"0")}`;
+      if (dates[i] === expected) { run++; if (run > best) best = run; }
+      else run = 1;
+    }
+
+    return { current, best: Math.max(best, current), total: [...new Set(logs.map(l=>l.date))].length };
+  }
+
+  /* ──────────────────────────────────────────
+     MOOD META
+  ────────────────────────────────────────── */
+  const MOODS = [
+    { key:"happy",     emoji:"😊", label:"Happy"     },
+    { key:"sad",       emoji:"😢", label:"Sad"        },
+    { key:"romantic",  emoji:"❤️", label:"Romantic"  },
+    { key:"relaxed",   emoji:"🌿", label:"Relaxed"    },
+    { key:"scared",    emoji:"😱", label:"Scared"     },
+    { key:"energetic", emoji:"⚡", label:"Energetic"  },
+  ];
+
+  const MOOD_EMOJI = Object.fromEntries(MOODS.map(m=>[m.key, m.emoji]));
+  const MOOD_LABEL = Object.fromEntries(MOODS.map(m=>[m.key, m.label]));
+
+  /* ──────────────────────────────────────────
+     TOAST
+  ────────────────────────────────────────── */
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 3000);
+  }
+
+  /* ──────────────────────────────────────────
+     RENDER STREAK COUNTERS
+  ────────────────────────────────────────── */
+  function renderCounters(streak) {
+    const wrap = document.getElementById("streakCounters");
+    wrap.innerHTML = `
+      <div class="streak-stat fire">
+        <div class="streak-stat-number">${streak.current}</div>
+        <div class="streak-stat-label">🔥 Current Streak</div>
+      </div>
+      <div class="streak-stat best">
+        <div class="streak-stat-number">${streak.best}</div>
+        <div class="streak-stat-label">⭐ Best Streak</div>
+      </div>
+      <div class="streak-stat total">
+        <div class="streak-stat-number">${streak.total}</div>
+        <div class="streak-stat-label">📅 Days Logged</div>
+      </div>
+    `;
+    // apply mood theme based on streak
+    const today = getLogs().find(l => l.date === todayStr());
+    if (today) applyMoodTheme(today.mood);
+    else applyMoodTheme("happy");
+  }
+
+  /* ──────────────────────────────────────────
+     RENDER THIS WEEK
+  ────────────────────────────────────────── */
+  function renderWeekly(logs) {
+    const logMap = Object.fromEntries(logs.map(l=>[l.date, l]));
+    const row = document.getElementById("weeklyRow");
+    const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const today = new Date();
+    const slots = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today); d.setDate(today.getDate() - i);
+      const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      slots.push({ ds, dayName: days[d.getDay()], dayNum: d.getDate() });
+    }
+    row.innerHTML = slots.map(s => {
+      const entry = logMap[s.ds];
+      return `
+        <div class="weekly-slot">
+          <div class="weekly-dot ${entry ? "logged" : ""}" title="${entry ? MOOD_LABEL[entry.mood] : "No log"}">${entry ? MOOD_EMOJI[entry.mood] : s.dayNum}</div>
+          <div class="weekly-day-lbl">${s.dayName}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  /* ──────────────────────────────────────────
+     RENDER LOG FORM
+  ────────────────────────────────────────── */
+  let selectedMood = null;
+
+  function renderLogForm(logs) {
+    const today = todayStr();
+    const alreadyEl = document.getElementById("alreadyLogged");
+    const logBtn = document.getElementById("logBtn");
+    const logDateLabel = document.getElementById("logDateLabel");
+    const moodNote = document.getElementById("moodNote");
+    const todayDisplay = document.getElementById("todayDisplay");
+
+    logDateLabel.textContent = `${new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})} — How are you feeling?`;
+
+    const todayEntry = logs.find(l => l.date === today);
+    const grid = document.getElementById("moodLogGrid");
+
+    grid.innerHTML = MOODS.map(m => `
+      <button class="mood-log-btn ${todayEntry && todayEntry.mood === m.key ? "selected" : ""}" data-mood="${m.key}">
+        <span class="mood-log-emoji">${m.emoji}</span>
+        <span class="mood-log-label">${m.label}</span>
+      </button>
+    `).join("");
+
+    if (todayEntry) {
+      alreadyEl.classList.add("show");
+      logBtn.disabled = true;
+      moodNote.disabled = true;
+      moodNote.value = todayEntry.note || "";
+      todayDisplay.innerHTML = `
+        <span class="tmood-emoji">${MOOD_EMOJI[todayEntry.mood]}</span>
+        <div class="tmood-label">Today's Mood</div>
+        <div class="tmood-value">${MOOD_LABEL[todayEntry.mood]}</div>
+        ${todayEntry.note ? `<div style="font-size:12px;color:var(--text-2);margin-top:6px;font-style:italic;">"${todayEntry.note}"</div>` : ""}
+      `;
+    } else {
+      alreadyEl.classList.remove("show");
+      logBtn.disabled = false;
+      moodNote.disabled = false;
+      todayDisplay.innerHTML = `
+        <span class="tmood-emoji">😶</span>
+        <div class="tmood-label">Status</div>
+        <div class="tmood-value" id="todayMoodValue">Not logged yet</div>
+      `;
+    }
+
+    // mood button clicks
+    grid.querySelectorAll(".mood-log-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (todayEntry) return;
+        grid.querySelectorAll(".mood-log-btn").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedMood = btn.dataset.mood;
+        applyMoodTheme(selectedMood);
+      });
+    });
+  }
+
+  /* ──────────────────────────────────────────
+     RENDER CALENDAR
+  ────────────────────────────────────────── */
+  function renderCalendar(logs) {
+    const logMap = Object.fromEntries(logs.map(l=>[l.date, l]));
+    const today = todayStr();
+    const wrap = document.getElementById("calendarWrap");
+    const now = new Date();
+
+    let html = "";
+    // show last 3 months
+    for (let mOff = 2; mOff >= 0; mOff--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - mOff, 1);
+      const year = d.getFullYear(), month = d.getMonth();
+      const monthName = d.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+      const daysInMonth = new Date(year, month+1, 0).getDate();
+      const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+
+      html += `<div class="cal-month-label">${monthName}</div>`;
+      html += `<div class="cal-grid">`;
+      // day labels
+      ["Su","Mo","Tu","We","Th","Fr","Sa"].forEach(d => {
+        html += `<div class="cal-day-label">${d}</div>`;
+      });
+      // empty cells before first day
+      for (let i = 0; i < firstDay; i++) html += `<div class="cal-cell"></div>`;
+      // actual days
+      for (let day = 1; day <= daysInMonth; day++) {
+        const ds = `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+        const entry = logMap[ds];
+        const isToday = ds === today;
+        const moodClass = entry ? `has-log mood-${entry.mood}` : "";
+        const todayClass = isToday ? "today" : "";
+        const tip = entry ? `${dateLabel(ds)} · ${MOOD_LABEL[entry.mood]}${entry.note ? ` · "${entry.note}"` : ""}` : dateLabel(ds);
+        html += `<div class="cal-cell ${moodClass} ${todayClass}" title="${tip}">
+          ${entry ? `<span class="cell-emoji">${MOOD_EMOJI[entry.mood]}</span>` : `<span style="font-size:10px;opacity:0.3">${day}</span>`}
+          <span class="cal-tip">${tip}</span>
+        </div>`;
+      }
+      html += `</div>`;
+    }
+    wrap.innerHTML = html;
+  }
+
+  /* ──────────────────────────────────────────
+     RENDER DISTRIBUTION
+  ────────────────────────────────────────── */
+  function renderDist(logs) {
+    const el = document.getElementById("distBars");
+    const emptyEl = document.getElementById("distEmpty");
+    if (!logs.length) { el.innerHTML = ""; emptyEl.style.display = "block"; return; }
+    emptyEl.style.display = "none";
+
+    const counts = {};
+    MOODS.forEach(m => counts[m.key] = 0);
+    logs.forEach(l => { if (counts[l.mood] !== undefined) counts[l.mood]++; });
+    const max = Math.max(...Object.values(counts), 1);
+
+    el.innerHTML = MOODS.map(m => `
+      <div class="dist-bar-row dist-${m.key}">
+        <div class="dist-label">${m.emoji} ${m.label}</div>
+        <div class="dist-track"><div class="dist-fill" style="width:${Math.round(counts[m.key]/max*100)}%"></div></div>
+        <div class="dist-count">${counts[m.key]}</div>
+      </div>
+    `).join("");
+  }
+
+  /* ──────────────────────────────────────────
+     RENDER HISTORY
+  ────────────────────────────────────────── */
+  function renderHistory(logs) {
+    const el = document.getElementById("historyList");
+    const emptyEl = document.getElementById("historyEmpty");
+    const sorted = [...logs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,30);
+    if (!sorted.length) { el.innerHTML = ""; emptyEl.style.display = "block"; return; }
+    emptyEl.style.display = "none";
+    el.innerHTML = sorted.map(entry => `
+      <div class="history-item">
+        <div class="history-date">${dateLabel(entry.date)}</div>
+        <div class="history-emoji">${MOOD_EMOJI[entry.mood]}</div>
+        <div class="history-mood" style="color:var(--${entry.mood})">${MOOD_LABEL[entry.mood]}</div>
+        <div class="history-note">${entry.note ? `"${entry.note}"` : "<span style='opacity:0.4'>No note</span>"}</div>
+        <button class="history-del" data-date="${entry.date}" title="Delete">🗑</button>
+      </div>
+    `).join("");
+
+    el.querySelectorAll(".history-del").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const logs = getLogs().filter(l => l.date !== btn.dataset.date);
+        saveLogs(logs);
+        renderAll();
+        showToast("Entry deleted.");
+      });
+    });
+  }
+
+  /* ──────────────────────────────────────────
+     RENDER ACHIEVEMENTS
+  ────────────────────────────────────────── */
+  function renderBadges(logs, streak) {
+    const total = [...new Set(logs.map(l=>l.date))].length;
+    const moodCounts = {};
+    MOODS.forEach(m => moodCounts[m.key] = 0);
+    logs.forEach(l => { if (moodCounts[l.mood] !== undefined) moodCounts[l.mood]++; });
+    const allMoodsLogged = MOODS.every(m => moodCounts[m.key] > 0);
+
+    const defs = [
+      { icon:"🌱", name:"First Log",      desc:"Log your first mood",                    unlocked: total >= 1 },
+      { icon:"🔥", name:"3-Day Streak",   desc:"Log 3 days in a row",                   unlocked: streak.best >= 3 },
+      { icon:"⚡", name:"Week Warrior",   desc:"Log 7 days in a row",                   unlocked: streak.best >= 7 },
+      { icon:"💎", name:"14-Day Diamond", desc:"Reach a 14-day streak",                 unlocked: streak.best >= 14 },
+      { icon:"👑", name:"Monthly Master", desc:"Log for 30 days in a row",              unlocked: streak.best >= 30 },
+      { icon:"🌈", name:"Mood Explorer",  desc:"Log all 6 different moods",             unlocked: allMoodsLogged },
+      { icon:"📅", name:"10 Days",        desc:"Log on 10 different days",              unlocked: total >= 10 },
+      { icon:"🏆", name:"Centurion",      desc:"Log on 100 different days",             unlocked: total >= 100 },
+    ];
+
+    document.getElementById("badgesGrid").innerHTML = defs.map(b => `
+      <div class="badge-card ${b.unlocked ? "unlocked" : ""}">
+        <span class="badge-icon">${b.icon}</span>
+        <div class="badge-name">${b.name}</div>
+        <div class="badge-desc">${b.desc}</div>
+      </div>
+    `).join("");
+  }
+
+  /* ──────────────────────────────────────────
+     RENDER ALL
+  ────────────────────────────────────────── */
+  function renderAll() {
+    const logs = getLogs();
+    const streak = calcStreak(logs);
+    renderCounters(streak);
+    renderWeekly(logs);
+    renderLogForm(logs);
+    renderCalendar(logs);
+    renderDist(logs);
+    renderHistory(logs);
+    renderBadges(logs, streak);
+  }
+
+  /* ──────────────────────────────────────────
+     LOG BUTTON
+  ────────────────────────────────────────── */
+  document.getElementById("logBtn").addEventListener("click", () => {
+    if (!selectedMood) { showToast("Pick a mood first!"); return; }
+    const note = (document.getElementById("moodNote").value || "").trim().slice(0,120);
+    const today = todayStr();
+    const logs = getLogs();
+    if (logs.find(l => l.date === today)) { showToast("Already logged today!"); return; }
+    logs.push({ date: today, mood: selectedMood, note });
+    saveLogs(logs);
+    const streak = calcStreak(logs);
+    showToast(`${MOOD_EMOJI[selectedMood]} Mood logged! ${streak.current > 1 ? `🔥 ${streak.current}-day streak!` : "Streak started!"}`);
+    selectedMood = null;
+    renderAll();
+  });
+
+  /* ──────────────────────────────────────────
+     INIT
+  ────────────────────────────────────────── */
+  renderAll();
+});
+</script>
+</body>
+</html>

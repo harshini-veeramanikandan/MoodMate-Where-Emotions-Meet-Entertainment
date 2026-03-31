@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoodMate — Your Mood, Your World</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="dark">
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <img src="image.png" alt="MoodMate" class="logo">
+      <h1>MoodMate</h1>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="playlists.html">Playlists</a>
+      <a href="movies.html">Movies</a>
+      <a href="music.html">Music</a>
+      <a href="games.html">Games</a>
+      <a href="voice-mood.html">🎙️ Voice</a>
+      <a href="streak.html">🔥 Streak</a>
+      <a href="profile.html">Profile</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <!-- Hero + sidebar -->
+  <div class="header">
+    <!-- LEFT: main hero -->
+    <div class="hero">
+      <h2>Your Mood. Your Movies. Your Music.</h2>
+      <p>Discover content that matches exactly how you feel — instantly curated.</p>
+      <div class="toolbar">
+        <a class="btn primary" href="playlists.html">🎧 Explore by Mood</a>
+        <button id="surpriseBtn" class="btn">🎲 Surprise Me</button>
+      </div>
+
+      <div class="section">
+        <h3>Pick a mood</h3>
+        <div class="mood-cards" id="moodCards"></div>
+      </div>
+
+      <div class="section">
+        <h3>Why MoodMate?</h3>
+        <div class="grid">
+          <div class="card"><div class="body"><div class="title">🎬 Curated Movies</div><div class="meta">Handpicked films for every feeling, from tearjerkers to thrillers.</div></div></div>
+          <div class="card"><div class="body"><div class="title">🎧 Music Playlists</div><div class="meta">Songs that perfectly match your vibe, from chill to energetic.</div></div></div>
+          <div class="card"><div class="body"><div class="title">❤️ Save Favorites</div><div class="meta">Build your personal mood library and revisit anytime.</div></div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>How it works</h3>
+        <div class="grid">
+          <div class="card"><div class="body"><div class="title">1 — Choose your mood</div><div class="meta">Pick from happy, sad, romantic, relaxed, scared, or energetic.</div></div></div>
+          <div class="card"><div class="body"><div class="title">2 — Get picks</div><div class="meta">See movies and songs curated for that exact mood.</div></div></div>
+          <div class="card"><div class="body"><div class="title">3 — Save &amp; enjoy</div><div class="meta">Favorite anything and revisit in your Playlists page.</div></div></div>
+        </div>
+      </div>
+
+      <div class="section" id="personalSection" style="display:none">
+        <h3>Welcome back</h3>
+        <div class="card"><div class="body">
+          <div class="title" id="welcomeTitle">Welcome back!</div>
+          <div class="actions">
+            <a class="btn" href="playlists.html">View Favorites</a>
+            <a class="btn" href="movies.html">Movies</a>
+            <a class="btn" href="music.html">Music</a>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="section">
+        <h3>Trending now</h3>
+        <div class="grid">
+          <div class="card"><div class="body"><div class="title">🔥 Popular moods</div><div class="meta">Happy · Romantic · Energetic</div></div></div>
+          <div class="card"><div class="body"><div class="title">⭐ Top movies</div><div class="meta">La La Land · The Intouchables · Amélie</div></div></div>
+          <div class="card"><div class="body"><div class="title">🎵 Most played</div><div class="meta">Happy · Perfect · Shake It Off</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: quick picks sidebar -->
+    <div class="summary">
+      <h3>Quick Picks</h3>
+      <p class="meta" style="margin-bottom:14px;font-size:12px;">Hit "Surprise Me" for fresh picks.</p>
+      <div id="quickMovie" style="margin-bottom:16px;"></div>
+      <div id="quickMusic"></div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div>MoodMate &mdash; Curated for your vibe</div>
+  <div style="margin-top:4px;font-size:11px;opacity:0.5">HTML · CSS · JavaScript</div>
+</footer>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    renderNavUser();
+    mountFavoriteHandler(document.body);
+
+    const surpriseBtn = document.getElementById("surpriseBtn");
+    const quickMovie  = document.getElementById("quickMovie");
+    const quickMusic  = document.getElementById("quickMusic");
+
+    function randomMood() { const moods = Object.keys(moodData); return moods[Math.floor(Math.random() * moods.length)]; }
+    function renderQuick(mood) {
+      applyMoodTheme(mood);
+      const data = moodData[mood] || { movies: [], music: [] };
+      const m = randomPick(data.movies);
+      const t = randomPick(data.music);
+      quickMovie.innerHTML = m ? movieCard(m, mood) : `<div class="card"><div class="body"><div class="title">No movie for "${mood}"</div></div></div>`;
+      quickMusic.innerHTML = t ? musicCard(t, mood) : `<div class="card"><div class="body"><div class="title">No song for "${mood}"</div></div></div>`;
+    }
+    surpriseBtn.addEventListener("click", () => renderQuick(randomMood()));
+    renderQuick("happy");
+
+    const moodCards = document.getElementById("moodCards");
+    const moods = [
+      { key:"happy",     emoji:"😊", label:"Happy"    },
+      { key:"sad",       emoji:"😢", label:"Sad"      },
+      { key:"romantic",  emoji:"❤️", label:"Romantic" },
+      { key:"relaxed",   emoji:"🌿", label:"Relaxed"  },
+      { key:"scared",    emoji:"😱", label:"Scared"   },
+      { key:"energetic", emoji:"⚡", label:"Energetic"},
+    ];
+    moodCards.innerHTML = moods.map(m => `
+      <a class="mood-btn" href="playlists.html?mood=${encodeURIComponent(m.key)}">
+        <div class="mood-emoji">${m.emoji}</div>
+        <div class="mood-label">${m.label}</div>
+      </a>
+    `).join("");
+
+    const session = getSession();
+    const ps = document.getElementById("personalSection");
+    if (session) {
+      ps.style.display = "block";
+      document.getElementById("welcomeTitle").textContent = `Welcome back, ${session.username} 👋`;
+    }
+  });
+</script>
+
+<a class="mic-float" href="voice-mood.html" title="Voice Mood Detector">🎙️</a>
+</body>
+</html>

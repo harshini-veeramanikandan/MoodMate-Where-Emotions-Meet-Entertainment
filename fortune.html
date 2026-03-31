@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mood Fortune — MoodMate</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="dark">
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <img src="image.png" alt="MoodMate Logo" class="logo">
+      <h1>MoodMate</h1>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="playlists.html">Playlists</a>
+      <a href="movies.html">Movies</a>
+      <a href="music.html">Music</a>
+      <a href="games.html" class="active">Games</a>
+      <a href="voice-mood.html">🎙️ Voice</a>
+      <a href="streak.html">🔥 Streak</a>
+      <a href="profile.html">Profile</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="header">
+    <!-- LEFT: game content -->
+    <div class="hero">
+      <h2>🔮 Mood Fortune Teller</h2>
+      <p>Let fate predict your vibe — mood, movie, song, and a quote.</p>
+      <div class="toolbar">
+        <button id="predictBtn" class="btn primary">✨ Predict my vibe</button>
+      </div>
+      <div class="section">
+        <h3>Your Fortune</h3>
+        <div id="fortuneMood" class="meta" style="font-size:18px;font-weight:600;margin-bottom:20px;"></div>
+        <div id="fortuneResults" class="grid"></div>
+        <div id="fortuneQuote" class="meta" style="margin-top:20px;font-style:italic;opacity:0.7;font-size:15px;text-align:center;"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: tips panel -->
+    <div class="summary">
+      <h3>Tip</h3>
+      <p style="color:var(--text-2);font-size:14px;margin-bottom:16px;">Save what you like — it goes to your Favorites in Playlists.</p>
+      <h3>Fortune Quotes</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="detail-info-card"><div class="detail-info-value" style="font-style:italic;">"Vibes don't lie — follow them."</div></div>
+        <div class="detail-info-card"><div class="detail-info-value" style="font-style:italic;">"Let your mood pick the soundtrack."</div></div>
+        <div class="detail-info-card"><div class="detail-info-value" style="font-style:italic;">"Tonight's feeling is your compass."</div></div>
+      </div>
+      <div style="margin-top:14px;">
+        <a class="btn" href="games.html">← Back to Games</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">© MoodMate — fortune</footer>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+<script src="fortune.js"></script>
+
+<a class="mic-float" href="voice-mood.html" title="Voice Mood Detector">🎙️</a>
+</body>
+</html>

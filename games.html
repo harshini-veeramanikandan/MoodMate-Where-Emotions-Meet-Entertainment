@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoodMate — Games</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="dark">
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <img src="image.png" alt="MoodMate Logo" class="logo">
+      <h1>MoodMate</h1>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="playlists.html">Playlists</a>
+      <a href="movies.html">Movies</a>
+      <a href="music.html">Music</a>
+      <a href="games.html" class="active">Games</a>
+      <a href="voice-mood.html">🎙️ Voice</a>
+      <a href="streak.html">🔥 Streak</a>
+      <a href="profile.html">Profile</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="header">
+    <!-- LEFT: game cards -->
+    <div class="hero">
+      <h2>MoodMate Games</h2>
+      <p>Original, mood-based mini-games. Pick one to play.</p>
+      <div class="grid">
+        <a class="card" href="alterego.html">
+          <div class="thumb" style="aspect-ratio:16/9;background:linear-gradient(135deg,rgba(255,107,157,0.3),rgba(124,92,252,0.3));display:grid;place-items:center;font-size:48px;">🔥</div>
+          <div class="body">
+            <div class="title">Alter-Ego Mood</div>
+            <div class="meta">Who are you today? Map your persona to a mood.</div>
+          </div>
+        </a>
+        <a class="card" href="color-mood.html">
+          <div class="thumb" style="aspect-ratio:16/9;background:linear-gradient(135deg,rgba(0,212,200,0.3),rgba(255,217,61,0.3));display:grid;place-items:center;font-size:48px;">🎨</div>
+          <div class="body">
+            <div class="title">Color → Mood</div>
+            <div class="meta">Pick a color, get a matching mood and picks.</div>
+          </div>
+        </a>
+        <a class="card" href="timeline.html">
+          <div class="thumb" style="aspect-ratio:16/9;background:linear-gradient(135deg,rgba(107,203,119,0.3),rgba(116,179,247,0.3));display:grid;place-items:center;font-size:48px;">🧠</div>
+          <div class="body">
+            <div class="title">Mood Timeline</div>
+            <div class="meta">Plan your day's emotions: Morning, Afternoon, Night.</div>
+          </div>
+        </a>
+        <a class="card" href="emotion-decoder.html">
+          <div class="thumb" style="aspect-ratio:16/9;background:linear-gradient(135deg,rgba(116,179,247,0.3),rgba(248,160,90,0.3));display:grid;place-items:center;font-size:48px;">🧠</div>
+          <div class="body">
+            <div class="title">Emotion Decoder</div>
+            <div class="meta">Type a sentence, decode your hidden mood.</div>
+          </div>
+        </a>
+        <a class="card" href="fortune.html">
+          <div class="thumb" style="aspect-ratio:16/9;background:linear-gradient(135deg,rgba(248,160,90,0.3),rgba(255,71,87,0.3));display:grid;place-items:center;font-size:48px;">🔮</div>
+          <div class="body">
+            <div class="title">Mood Fortune Teller</div>
+            <div class="meta">Let fate pick your vibe, movie, and song.</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- RIGHT: tips -->
+    <div class="summary">
+      <h3>Tip</h3>
+      <p style="color:var(--text-2);font-size:14px;margin-bottom:16px;">Favorites you save from picks still show in Playlists.</p>
+      <h3>Games</h3>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+        <a class="btn" href="alterego.html">🔥 Alter-Ego</a>
+        <a class="btn" href="color-mood.html">🎨 Color → Mood</a>
+        <a class="btn" href="timeline.html">🧠 Timeline</a>
+        <a class="btn" href="emotion-decoder.html">🧠 Decoder</a>
+        <a class="btn" href="fortune.html">🔮 Fortune</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">© MoodMate — games</footer>
+
+<script src="script.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    applyMoodTheme("energetic");
+    renderNavUser();
+    mountFavoriteHandler(document.body);
+  });
+</script>
+
+<a class="mic-float" href="voice-mood.html" title="Voice Mood Detector">🎙️</a>
+</body>
+</html>

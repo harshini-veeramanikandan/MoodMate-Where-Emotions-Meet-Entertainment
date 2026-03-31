@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoodMate — Movies</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="dark">
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <img src="image.png" alt="MoodMate" class="logo">
+      <h1>MoodMate</h1>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="playlists.html">Playlists</a>
+      <a href="movies.html" class="active">Movies</a>
+      <a href="music.html">Music</a>
+      <a href="games.html">Games</a>
+      <a href="voice-mood.html">🎙️ Voice</a>
+      <a href="streak.html">🔥 Streak</a>
+      <a href="profile.html">Profile</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-hero-banner movies">
+    <h2>Movies by Mood</h2>
+    <p>Handpicked films for every feeling. Filter by mood or shuffle for a surprise.</p>
+    <div class="toolbar">
+      <select id="moodSelect" class="select">
+        <option value="happy">😊 Happy</option>
+        <option value="sad">😢 Sad</option>
+        <option value="romantic">❤️ Romantic</option>
+        <option value="relaxed">🌿 Relaxed</option>
+        <option value="scared">😱 Scared</option>
+        <option value="energetic">⚡ Energetic</option>
+      </select>
+      <button id="showBtn" class="btn primary">Show Movies</button>
+      <button id="randomBtn" class="btn">🎲 Shuffle</button>
+    </div>
+  </div>
+
+  <div class="mood-filter-pills" id="moodPills">
+    <button class="mood-pill active" data-mood="happy">😊 Happy</button>
+    <button class="mood-pill" data-mood="sad">😢 Sad</button>
+    <button class="mood-pill" data-mood="romantic">❤️ Romantic</button>
+    <button class="mood-pill" data-mood="relaxed">🌿 Relaxed</button>
+    <button class="mood-pill" data-mood="scared">😱 Scared</button>
+    <button class="mood-pill" data-mood="energetic">⚡ Energetic</button>
+  </div>
+
+  <!-- Main content + sidebar -->
+  <div style="display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start">
+    <div>
+      <div class="count-label" id="countLabel"></div>
+      <div id="moviesGrid" class="grid"></div>
+    </div>
+    <div style="position:sticky;top:80px;">
+      <div class="summary">
+        <h3>Quick Pick</h3>
+        <div id="quickMovie"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">© MoodMate — Movies</footer>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  renderNavUser();
+  mountFavoriteHandler(document.body);
+
+  const moodSelect  = document.getElementById("moodSelect");
+  const showBtn     = document.getElementById("showBtn");
+  const randomBtn   = document.getElementById("randomBtn");
+  const moviesGrid  = document.getElementById("moviesGrid");
+  const quickMovie  = document.getElementById("quickMovie");
+  const countLabel  = document.getElementById("countLabel");
+  const pills       = document.querySelectorAll(".mood-pill");
+
+  function items(mood) { return (moodData[mood]?.movies || []); }
+
+  function renderMovies(mood) {
+    applyMoodTheme(mood);
+    const list = items(mood);
+    countLabel.textContent = `${list.length} films for "${mood}"`;
+    moviesGrid.innerHTML = list.length
+      ? list.map(m => movieCard(m, mood)).join("")
+      : `<p class="meta" style="grid-column:1/-1;padding:40px;text-align:center;opacity:0.5">No movies for this mood yet.</p>`;
+    pills.forEach(p => p.classList.toggle("active", p.dataset.mood === mood));
+    moodSelect.value = mood;
+  }
+
+  function renderQuickMovie(mood) {
+    const m = randomPick(items(mood));
+    quickMovie.innerHTML = m ? movieCard(m, mood) : `<div class="card"><div class="body"><div class="title">No movie</div></div></div>`;
+  }
+
+  pills.forEach(pill => {
+    pill.addEventListener("click", () => {
+      renderMovies(pill.dataset.mood);
+      renderQuickMovie(pill.dataset.mood);
+    });
+  });
+
+  moodSelect.addEventListener("change", () => { renderMovies(moodSelect.value); renderQuickMovie(moodSelect.value); });
+  showBtn.addEventListener("click", () => renderMovies(moodSelect.value));
+  randomBtn.addEventListener("click", () => renderQuickMovie(moodSelect.value));
+
+  const urlMood = new URLSearchParams(window.location.search).get("mood");
+  if (urlMood && moodData[urlMood]) moodSelect.value = urlMood;
+  const init = moodSelect.value || "happy";
+  renderMovies(init);
+  renderQuickMovie(init);
+});
+</script>
+<a class="mic-float" href="voice-mood.html" title="Voice Mood Detector">🎙️</a>
+</body>
+</html>

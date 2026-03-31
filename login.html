@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoodMate — Login</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="dark">
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <img src="image.png" alt="MoodMate Logo" class="logo">
+      <h1>MoodMate</h1>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="playlists.html">Playlists</a>
+      <a href="movies.html">Movies</a>
+      <a href="music.html">Music</a>
+      <a href="games.html">Games</a>
+      <a href="voice-mood.html">🎙️ Voice</a>
+      <a href="streak.html">🔥 Streak</a>
+      <a href="profile.html">Profile</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="header">
+    <!-- LEFT: login form -->
+    <div class="hero">
+      <h2>Login / Sign up</h2>
+      <p>Use a simple username. Multiple users supported on this device.</p>
+      <div class="toolbar">
+        <input id="usernameInput" class="input" placeholder="Enter username" style="flex:1;" />
+        <button id="signupBtn" class="btn primary">Sign up</button>
+        <button id="loginBtn" class="btn">Login</button>
+      </div>
+      <div class="section">
+        <h3>Existing accounts</h3>
+        <div id="userList" class="grid"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: tip panel -->
+    <div class="summary">
+      <h3>Tip</h3>
+      <p style="color:var(--text-2);font-size:14px;margin-bottom:16px;">After login, your avatar appears in the navbar. Switch accounts anytime in Profile.</p>
+      <h3>How it works</h3>
+      <p style="color:var(--text-2);font-size:14px;">Accounts are stored locally on your device. No password required — just pick a username.</p>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">© MoodMate — login</footer>
+
+<script src="script.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    applyMoodTheme("happy");
+    renderNavUser();
+
+    const usernameInput = document.getElementById("usernameInput");
+    const signupBtn     = document.getElementById("signupBtn");
+    const loginBtn      = document.getElementById("loginBtn");
+    const userList      = document.getElementById("userList");
+
+    function renderUsers() {
+      const users = getUsers();
+      userList.innerHTML = users.length
+        ? users.map(u => `
+            <div class="card"><div class="body">
+              <div class="title"><span class="avatar">${u.avatar}</span> ${u.username}</div>
+              <div class="actions">
+                <button class="btn primary" data-username="${u.username}">Login as ${u.username}</button>
+              </div>
+            </div></div>
+          `).join("")
+        : `<p class="meta">No accounts yet. Create one above.</p>`;
+      userList.querySelectorAll("button[data-username]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          setSession({ username: btn.dataset.username, avatar: btn.dataset.username.slice(0,1).toUpperCase() });
+          location.href = "index.html";
+        });
+      });
+    }
+
+    signupBtn.addEventListener("click", () => {
+      const name = (usernameInput.value || "").trim();
+      if (!name) { alert("Enter a username"); return; }
+      const res = addUser(name);
+      if (!res.ok) { alert(res.error); return; }
+      setSession(res.user);
+      location.href = "index.html";
+    });
+
+    loginBtn.addEventListener("click", () => {
+      const name = (usernameInput.value || "").trim();
+      if (!name) { alert("Enter a username"); return; }
+      const users = getUsers();
+      const user = users.find(u => u.username.toLowerCase() === name.toLowerCase());
+      if (!user) { alert("User not found. Sign up first."); return; }
+      setSession(user);
+      location.href = "index.html";
+    });
+
+    renderUsers();
+  });
+</script>
+
+<a class="mic-float" href="voice-mood.html" title="Voice Mood Detector">🎙️</a>
+</body>
+</html>
